@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Manifest>
+  <identifier>net.pardeike.rimworld.mod.groundhogsave</identifier>
+  <version>1.0.0.0</version>
+  <targetVersions>
+    <li>1.6.0</li>
+  </targetVersions>
+  <dependencies>
+  </dependencies>
+  <incompatibleWith>
+  </incompatibleWith>
+  <loadBefore>
+  </loadBefore>
+  <loadAfter>
+  </loadAfter>
+  <manifestUri>https://raw.githubusercontent.com/pardeike/GroundhogSave/latest/About/Manifest.xml</manifestUri>
+  <downloadUri>https://github.com/pardeike/GroundhogSave/releases/latest</downloadUri>
+</Manifest>

@@ -1,0 +1,11 @@
+﻿<Project>
+
+	<PropertyGroup>
+		<ModName>Groundhog Save</ModName>
+		<ModFileName>GroundhogSave</ModFileName>
+		<Repository>https://github.com/pardeike/GroundhogSave</Repository>
+		<ModVersion>1.0.0.0</ModVersion>
+		<ProjectGuid>{09158240-4F83-11F0-B558-0800200C9A66}</ProjectGuid>
+	</PropertyGroup>
+
+</Project>

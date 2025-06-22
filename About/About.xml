@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>Groundhog Save</name>
+  <author>Andreas Pardeike</author>
+  <supportedVersions>
+    <li>1.6</li>
+  </supportedVersions>
+  <modDependencies>
+    <li>
+      <packageId>brrainz.harmony</packageId>
+      <displayName>Harmony</displayName>
+      <steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
+      <downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
+    </li>
+  </modDependencies>
+  <packageId>brrainz.groundhogsave</packageId>
+  <modVersion>1.0.0.0</modVersion>
+  <steamAppId>0</steamAppId>
+  <description>Groundhog Save will save a new commitment game in a way so you can load it once and still enjoy commitment mode without setting up everything after a failed run attempt!
+
+If you like this mod, check out my other mods on steam:
+https://steamcommunity.com/id/brrainz/myworkshopfiles/
+
+Powered by Harmony Patch Library
+
+/Brrainz</description>
+</ModMetaData>
