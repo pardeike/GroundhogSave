@@ -1,12 +1,15 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<RootNamespace>$(ModFileName)</RootNamespace>
 		<AssemblyName>$(ModFileName)</AssemblyName>
-		<TargetFramework>net472</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<LangVersion>latest</LangVersion>
-		<PlatformTarget>x64</PlatformTarget>
-		<OutputPath>..\Assemblies\</OutputPath>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+		<OutputPath>..\1.7\Assemblies\</OutputPath>
+		<GenerateDependencyFile>false</GenerateDependencyFile>
+		<NoWarn>$(NoWarn);NU1701</NoWarn>
+		<PythonCommand Condition="'$(PythonCommand)' == ''">python3</PythonCommand>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<Version>$(ModVersion)</Version>
@@ -44,24 +47,32 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Brrainz.RimWorld.CrossPromotion" Version="1.1.2" />
-		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4543" GeneratePathProperty="true" />
-		<PackageReference Include="Lib.Harmony" Version="2.4.0" ExcludeAssets="runtime" />
-		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
-		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="1.0.3">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
+		<PackageReference Include="Brrainz.RimWorld.CrossPromotion" Version="1.1.2" GeneratePathProperty="true" ExcludeAssets="runtime" />
+		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.7.5021-unstable" GeneratePathProperty="true" />
+		<PackageReference Include="Lib.Harmony.Ref" Version="3.0.0-rc.8" />
 		<PackageReference Include="TaskPubliciser" Version="1.0.3" />
 	</ItemGroup>
 
-	<Target Name="MyCode" BeforeTargets="UpdateReferences">
+	<Target Name="ValidateLocalBuild" BeforeTargets="PrepareForBuild">
 		<PropertyGroup>
-			<AssemblyCSharp>$(PkgKrafs_Rimworld_Ref)\ref\net472\Assembly-CSharp.dll</AssemblyCSharp>
-			<PubliciseOutputPath>$(PkgKrafs_Rimworld_Ref)\ref\net472\</PubliciseOutputPath>
+			<CurrentOutputDirectory>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(OutputPath)'))</CurrentOutputDirectory>
+			<CurrentTargetDirectory>$([MSBuild]::NormalizeDirectory('$(TargetDir)'))</CurrentTargetDirectory>
+			<ExpectedOutputDirectory>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '../1.7/Assemblies/'))</ExpectedOutputDirectory>
+		</PropertyGroup>
+		<Error Condition="'$(CurrentOutputDirectory)' != '$(ExpectedOutputDirectory)'" Text="Build output must stay in 1.7/Assemblies. The root payload is frozen." />
+		<Error Condition="'$(CurrentTargetDirectory)' != '$(ExpectedOutputDirectory)'" Text="The target directory must stay in 1.7/Assemblies. Do not override OutDir." />
+		<Error Condition="'$(PlatformTarget)' != 'AnyCPU'" Text="The RimWorld 1.7 build must target AnyCPU." />
+		<Exec Command="&quot;$(PythonCommand)&quot; &quot;$(MSBuildProjectDirectory)/../scripts/package.py&quot; verify-legacy" />
+		<Exec Condition="'$(RIMWORLD_MOD_DIR)' != ''" Command="&quot;$(PythonCommand)&quot; &quot;$(MSBuildProjectDirectory)/../scripts/package.py&quot; check-deploy &quot;$(RIMWORLD_MOD_DIR)&quot;" />
+	</Target>
+
+	<Target Name="MyCode" BeforeTargets="ResolveAssemblyReferences">
+		<PropertyGroup>
+			<AssemblyCSharp>$(PkgKrafs_Rimworld_Ref)\ref\net10.0\Assembly-CSharp.dll</AssemblyCSharp>
+			<PubliciseOutputPath>$(MSBuildProjectDirectory)\obj\publicised\</PubliciseOutputPath>
 			<AssemblyCSharp_Publicised>$(PubliciseOutputPath)Assembly-CSharp_publicised.dll</AssemblyCSharp_Publicised>
 		</PropertyGroup>
-		<Message Importance="High" Text="Publicising Rimworld Assembly ..." />
+		<MakeDir Directories="$(PubliciseOutputPath)" />
 		<Publicise TargetAssemblyPath="$(AssemblyCSharp)" OutputPath="$(PubliciseOutputPath)" Condition="Exists('$(AssemblyCSharp)')" />
 		<Message Importance="High" Text="Replacing reference to un-publicised assemblies with publicised equivalents ..." />
 		<ItemGroup>
@@ -77,32 +88,23 @@
 	<Target Name="UpdateReferences" AfterTargets="ResolveLockFileReferences">
 		<Message Importance="High" Text="Remove References ..." />
 		<ItemGroup>
-			<Reference Remove="$(PkgKrafs_Rimworld_Ref)\ref\net472\Assembly-CSharp.dll" />
+			<Reference Remove="$(PkgKrafs_Rimworld_Ref)\ref\net10.0\Assembly-CSharp.dll" />
 		</ItemGroup>
 	</Target>
 
 	<Target Name="PostBuildAction" AfterTargets="Build">
-		<XmlPoke XmlInputPath="$(MSBuildProjectDirectory)\..\About\About.xml" Query="//ModMetaData/modVersion" Value="$(ModVersion)" />
-		<XmlPoke XmlInputPath="$(MSBuildProjectDirectory)\..\About\Manifest.xml" Query="//Manifest/version" Value="$(ModVersion)" />
+		<XmlPoke XmlInputPath="$(MSBuildProjectDirectory)/../About/About.xml" Query="//ModMetaData/modVersion" Value="$(ModVersion)" />
+		<XmlPoke XmlInputPath="$(MSBuildProjectDirectory)/../About/Manifest.xml" Query="//Manifest/version" Value="$(ModVersion)" />
+		<Copy SourceFiles="$(PkgBrrainz_RimWorld_CrossPromotion)\lib\net472\CrossPromotion.dll" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+		<Exec Command="&quot;$(PythonCommand)&quot; &quot;$(MSBuildProjectDirectory)/../scripts/package.py&quot; verify-legacy" />
+	</Target>
+
+	<Target Name="PackageMod" DependsOnTargets="Build">
+		<Exec Command="&quot;$(PythonCommand)&quot; &quot;$(MSBuildProjectDirectory)/../scripts/package.py&quot; package" />
 	</Target>
 
 	<Target Name="CopyToRimworld" AfterTargets="PostBuildAction" Condition="'$(RIMWORLD_MOD_DIR)' != ''">
-		<Delete Files="..\Assemblies\0Harmony.dll" />
-		<RemoveDir Directories="$(RIMWORLD_MOD_DIR)\$(ModFileName)" />
-		<ItemGroup>
-			<CopyAbout Include="..\About\**" />
-			<CopyAssemblies Include="..\Assemblies\**" />
-			<CopyLanguages Include="..\Languages\**" />
-			<CopyLicense Include="..\LICENSE" />
-		</ItemGroup>
-		<Copy SourceFiles="@(CopyAbout)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)\About\%(RecursiveDir)" />
-		<Copy SourceFiles="@(CopyAssemblies)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)\Assemblies\%(RecursiveDir)" />
-		<Copy SourceFiles="@(CopyLanguages)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)\Languages\%(RecursiveDir)" />
-		<Copy SourceFiles="@(CopyLicense)" DestinationFolder="$(RIMWORLD_MOD_DIR)\$(ModFileName)" />
-	</Target>
-
-	<Target Name="ZipMod" AfterTargets="CopyToRimworld" Condition="'$(RIMWORLD_MOD_DIR)' != ''">
-		<ZipDirectory SourceDirectory="$(RIMWORLD_MOD_DIR)\$(ModFileName)" DestinationFile="$(RIMWORLD_MOD_DIR)\$(ModFileName).zip" Overwrite="true" />
+		<Exec Command="&quot;$(PythonCommand)&quot; &quot;$(MSBuildProjectDirectory)/../scripts/package.py&quot; deploy &quot;$(RIMWORLD_MOD_DIR)&quot;" />
 	</Target>
 
 </Project>

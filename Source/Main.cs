@@ -18,7 +18,7 @@ namespace GroundhogSave
 		static Main()
 		{
 			var harmony = new Harmony("net.pardeike.harmony.GroundhogSave");
-			harmony.PatchAll();
+			harmony.PatchAll(typeof(Main).Assembly);
 			CrossPromotion.Install(76561197973010050);
 		}
 	}

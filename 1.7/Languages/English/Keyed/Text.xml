@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+	  <PermastartModeSaveSuffix>(Permastart)</PermastartModeSaveSuffix>
+	  <GroundhogIntroduction>It's Groundhog time!\n\nTo start a commitment mode run, enter a file name and press {0}. Otherwise simply press {1}:</GroundhogIntroduction>
+
+</LanguageData>

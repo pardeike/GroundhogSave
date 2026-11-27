@@ -4,6 +4,7 @@
   <author>Andreas Pardeike</author>
   <supportedVersions>
     <li>1.6</li>
+    <li>1.7</li>
   </supportedVersions>
   <modDependencies>
     <li>
@@ -14,7 +15,7 @@
     </li>
   </modDependencies>
   <packageId>brrainz.groundhogsave</packageId>
-  <modVersion>1.0.0.0</modVersion>
+  <modVersion>1.0.1.0</modVersion>
   <steamAppId>0</steamAppId>
   <description>Groundhog Save will save a new commitment game in a way so you can load it once and still enjoy commitment mode without setting up everything after a failed run attempt!
 
